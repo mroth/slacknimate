@@ -57,8 +57,8 @@ func main() {
 				stderr.Fatal("Destination is required.",
 					" Use --channel or set SLACK_CHANNEL env variable.")
 			}
-			if delay <= 0 {
-				stderr.Fatal("You must have a delay >0 to avoid creating a time paradox.")
+			if delay < 0.001 {
+				stderr.Fatal("You must have a delay >=0.001 to avoid creating a time paradox.")
 			}
 		}
 
@@ -74,7 +74,7 @@ func main() {
 		params.AsUser = true
 
 		var dst, ts, txt string
-		tickerChan := time.Tick(time.Second * time.Duration(delay))
+		tickerChan := time.Tick(time.Millisecond * time.Duration(delay*1000))
 
 		for frame := range frames {
 			<-tickerChan
