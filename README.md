@@ -14,7 +14,7 @@ homebrew organization uses GitHub stars as the measure of popularity in deciding
 whether to accept new recipes._
 
 ## Authentication
-Simply grab your Slack user token from [this page][1].
+Generate your Slack user token on [this page][1].
 
 You'll need to either pass it to the program via the `--api-token` flag or store
 it as `SLACK_TOKEN` environment variable.
