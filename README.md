@@ -1,7 +1,10 @@
 # slacknimate
 > text animation for Slack messages :dancers:
 
-EMOJI EXAMPLE HERE
+![slacknimate1](https://cloud.githubusercontent.com/assets/40650/13275355/32f5997c-da82-11e5-8a9d-61c53f94c718.gif)
+
+![slacknimate2](https://cloud.githubusercontent.com/assets/40650/13275356/36c8f15c-da82-11e5-93c1-ef8e6d3e556e.gif)
+
 
 ## Installation
 Download a binary from the Releases Page and put it somewhere on your `$PATH`.
@@ -50,7 +53,7 @@ GLOBAL OPTIONS:
 
     $ slacknimate -c "#general" --loop < examples/emoji.txt
 
-SCREENCAP**
+![slacknimate1](https://cloud.githubusercontent.com/assets/40650/13275355/32f5997c-da82-11e5-8a9d-61c53f94c718.gif)
 
 ### Realtime process monitoring
 Why spam a chatroom with periodic monitoring messages when you can have realtime
@@ -70,14 +73,16 @@ $ ./examples/process.sh 5 | slacknimate -c "#devops"
 Done!
 ```
 
-SCREENCAP**
+![slacknimate2](https://cloud.githubusercontent.com/assets/40650/13275356/36c8f15c-da82-11e5-93c1-ef8e6d3e556e.gif)
+
 
 ### Preview in terminal
 If you aren't certain about your source, you can preview what the animation
 would look like in the terminal via the `--preview` flag.
 
-    $ slacknimate --preview --loop -d 0.1 < examples/sample.txt
+    $ slacknimate --preview --loop -d 0.25 < examples/sample.txt
 
+![slacknimate3](https://cloud.githubusercontent.com/assets/40650/13275357/3b04b6ac-da82-11e5-9fab-1a7704c98b12.gif)
 
 ## Bots
 In order for Slack message editing to work, the message _must_ be posted
