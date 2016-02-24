@@ -7,7 +7,7 @@
 
 
 ## Installation
-Download a binary from the Releases Page and put it somewhere on your `$PATH`.
+Download a binary from the [Releases Page](https://github.com/mroth/slacknimate/releases) and put it somewhere on your `$PATH`.
 
 _Mac users, want this installable via Homebrew? Please :star: this repo, as the
 homebrew organization uses GitHub stars as the measure of popularity in deciding
