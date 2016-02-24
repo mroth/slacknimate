@@ -1,0 +1,4 @@
+package: github.com/mroth/slacknimate
+import:
+- package: github.com/codegangsta/cli
+- package: github.com/nlopes/slack
