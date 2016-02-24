@@ -9,7 +9,8 @@ package_deps:
 
 package: package_deps build
 	goxc -pv=`./bin/slacknimate -v | cut -d' ' -f3` \
-	 		 -d="builds" -bc="linux,!arm darwin windows" xc archive rmbin
+	     --resources-include="README*,examples" \
+	     -d="builds" -bc="linux,!arm darwin windows" xc archive rmbin
 
 clobber:
 	rm -rf builds
