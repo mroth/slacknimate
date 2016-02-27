@@ -4,6 +4,12 @@
 build:
 	go build -o bin/slacknimate
 
+install: 
+	go install .
+
+uninstall:
+	rm $(GOPATH)/bin/slacknimate
+
 package_deps:
 	go get github.com/laher/goxc
 
@@ -13,4 +19,4 @@ package: package_deps build
 	     -d="builds" -bc="linux,!arm darwin windows" xc archive rmbin
 
 clobber:
-	rm -rf builds
+	rm -rf builds bin
