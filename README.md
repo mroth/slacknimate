@@ -34,7 +34,7 @@ USAGE:
    slacknimate [options]
 
 VERSION:
-   1.0.0-alpha
+   1.0.0
 
 COMMANDS:
    help, h	Shows a list of commands or help for one command
