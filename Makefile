@@ -1,15 +1,28 @@
-.PHONY: install_deps build package clobber
+.PHONY: build_deps build goinstall gouninstall package_deps package clobber
 .DEFAULT_GOAL := build
 
-build:
+vendor:
+	@type glide >/dev/null 2>&1 || \
+		{ echo >&2 "I require glide but it is not installed.  Aborting."; exit 1; }
+	glide install
+
+build_deps:
+	@type go >/dev/null 2>&1 || \
+		{ echo >&2 "I require go but it is not installed.  Aborting."; exit 1; }
+
+build: vendor build_deps
 	go build -o bin/slacknimate
 
-install: 
+
+# Standard go install, for people with a valid go / $GOPATH setup
+goinstall:
 	go install .
 
-uninstall:
+gouninstall:
 	rm $(GOPATH)/bin/slacknimate
 
+
+# For cross compiling and packaging releases
 package_deps:
 	go get github.com/laher/goxc
 
@@ -18,5 +31,6 @@ package: package_deps build
 	     --resources-include="README*,LICENSE*,examples" \
 	     -d="builds" -bc="linux,!arm darwin windows" xc archive rmbin
 
+
 clobber:
-	rm -rf builds bin
+	rm -rf builds bin vendor
