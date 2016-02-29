@@ -1,0 +1,30 @@
+#!/usr/bin/env ruby
+
+# An example of a what the output of a fancy deploy status script output might
+# produce.
+
+def status_flavor(percent)
+  case percent
+  when 0..10;   "Beginning Deploy"
+  when 11..20;  "Extracting Resources"
+  when 21..30;  "Reticulating Splines"
+  when 31..60;  "Running Integration Tests"
+  when 61..70;  "Modeling Object Components"
+  when 71..80;  "Obfuscating Quigley Matrix"
+  when 81..90;  "Smashing the Patriarchy"
+  when 91..100; "Finishing Up"
+  end
+end
+
+def status_msg(percent)
+  "🚀*DEPLOY:* _#{status_flavor(percent)}_ (#{percent}% complete)"
+end
+
+$stdout.sync = true
+p = 1
+while p < 100
+  puts status_msg(p)
+  p += rand(1..4)
+  sleep 1
+end
+puts status_msg(100) + " ✨*All Done!*✨"
