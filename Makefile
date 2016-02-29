@@ -1,5 +1,5 @@
 .PHONY: install_deps build package clobber
-.DEFAULT: build
+.DEFAULT_GOAL := build
 
 build:
 	go build -o bin/slacknimate
