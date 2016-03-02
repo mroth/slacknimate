@@ -33,4 +33,4 @@ package: package_deps build
 
 
 clobber:
-	rm -rf builds bin vendor
+	rm -rf builds bin
