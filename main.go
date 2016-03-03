@@ -14,7 +14,7 @@ func main() {
 	app := cli.NewApp()
 	app.Name = "slacknimate"
 	app.Usage = "text animation for Slack messages"
-	app.Version = "1.0.0"
+	app.Version = "1.0.1"
 	app.UsageText = "slacknimate [options]"
 	app.Flags = []cli.Flag{
 		cli.StringFlag{
