@@ -1,16 +1,11 @@
 .PHONY: build_deps build goinstall gouninstall package_deps package clobber
 .DEFAULT_GOAL := build
 
-vendor:
-	@type glide >/dev/null 2>&1 || \
-		{ echo >&2 "I require glide but it is not installed.  Aborting."; exit 1; }
-	glide install
-
 build_deps:
 	@type go >/dev/null 2>&1 || \
 		{ echo >&2 "I require go but it is not installed.  Aborting."; exit 1; }
 
-build: vendor build_deps
+build: build_deps
 	go build -o bin/slacknimate
 
 
