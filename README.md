@@ -9,9 +9,7 @@
 ## Installation
 Download a binary from the [Releases Page](https://github.com/mroth/slacknimate/releases) and put it somewhere on your `$PATH`.
 
-_Mac users, want this installable via Homebrew? Please :star: this repo, as the
-homebrew organization uses GitHub stars as the measure of popularity in deciding
-whether to accept new recipes._
+_Mac OS X Homebrew users, you can also just `brew install slacknimate`._
 
 ## Authentication
 Generate your Slack user token on [this page][1].
