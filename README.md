@@ -1,15 +1,24 @@
 # slacknimate
 > text animation for Slack messages :dancers:
 
-![slacknimate1](https://cloud.githubusercontent.com/assets/40650/13275355/32f5997c-da82-11e5-8a9d-61c53f94c718.gif)
+Useful for ChatOps:
+![deployinator](https://cloud.githubusercontent.com/assets/40650/26273321/0cd49fda-3cfc-11e7-90ce-78f369e783ac.gif)
 
-![slacknimate2](https://cloud.githubusercontent.com/assets/40650/13275356/36c8f15c-da82-11e5-93c1-ef8e6d3e556e.gif)
+
+
+...Or for comedy:
+
+![slacknimate_fine2](https://cloud.githubusercontent.com/assets/40650/26273332/613cc17e-3cfc-11e7-9365-88b0043c17ef.gif)
+
+...Or maybe art:
+
+![slacknimate_nyan](https://cloud.githubusercontent.com/assets/40650/26273350/ad3b0d56-3cfc-11e7-9359-83c92f440a03.gif)
 
 
 ## Installation
 Download a binary from the [Releases Page](https://github.com/mroth/slacknimate/releases) and put it somewhere on your `$PATH`.
 
-_Mac OS X Homebrew users, you can also just `brew install slacknimate`._
+_macOS Homebrew users, you can also just `brew install slacknimate`._
 
 ## Authentication
 Generate your Slack user token on [this page][1].
