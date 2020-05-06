@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -78,6 +79,14 @@ func main() {
 
 		for frame := range frames {
 			<-tickerChan
+
+			var err error
+			var decoded string
+			err = json.Unmarshal([]byte(frame), &decoded)
+			if err == nil {
+				frame = decoded
+			}
+
 			if noop {
 				fmt.Printf("\033[2K\r%s", frame)
 			} else {
