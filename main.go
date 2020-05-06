@@ -41,12 +41,17 @@ func main() {
 			Name:  "preview",
 			Usage: "preview on terminal instead of posting",
 		},
+		cli.BoolFlag{
+			Name:  "json-encoded, j",
+			Usage: "JSON encoded string input",
+		},
 	}
 	app.Action = func(c *cli.Context) {
 		apiToken := c.String("api-token")
 		channel := c.String("channel")
 		delay := c.Float64("delay")
 		noop := c.Bool("preview")
+		isJson := c.Bool("json-encoded")
 
 		if !noop {
 			stderr := log.New(os.Stderr, "", 0) // log to stderr with no timestamps
@@ -80,11 +85,15 @@ func main() {
 		for frame := range frames {
 			<-tickerChan
 
-			var err error
-			var decoded string
-			err = json.Unmarshal([]byte(frame), &decoded)
-			if err == nil {
-				frame = decoded
+			if isJson {
+				var err error
+				var decoded string
+				err = json.Unmarshal([]byte(frame), &decoded)
+				if err != nil {
+					log.Printf("ERROR: invalid JSON encoded string: %v", err)
+				} else {
+					frame = decoded
+				}
 			}
 
 			if noop {
