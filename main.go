@@ -1,13 +1,12 @@
 package main
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"os"
 	"time"
 
 	"github.com/codegangsta/cli"
-	"github.com/slack-go/slack"
 )
 
 func main() {
@@ -62,44 +61,40 @@ func main() {
 			}
 		}
 
-		var frames chan string
+		ctx := context.Background()
+		var frames <-chan string
 		if c.Bool("loop") {
-			frames = LoopingStdinScanner()
+			frames = NewLoopingLineScanner(ctx, os.Stdin, 4096).Frames()
 		} else {
-			frames = StdinScanner()
+			frames = NewLineScanner(ctx, os.Stdin).Frames()
 		}
 
-		api := slack.New(apiToken)
-
-		var dst, ts, txt string
-		tickerChan := time.Tick(time.Millisecond * time.Duration(delay*1000))
-
-		for frame := range frames {
-			<-tickerChan
-			if noop {
-				fmt.Printf("\033[2K\r%s", frame)
-			} else {
-				msgText := slack.MsgOptionText(frame, true)
-				if dst == "" || ts == "" {
-					var err error
-					dst, ts, err = api.PostMessage(channel, msgText, slack.MsgOptionAsUser(true))
-					if err != nil {
-						log.Fatal("FATAL: Could not post initial frame to Slack: ", err)
-					}
-					log.Printf("initial frame %v/%v: %v\n", dst, ts, frame)
-				} else {
-					var err error
-					_, _, txt, err = api.UpdateMessage(dst, ts, msgText)
-					if err != nil {
-						log.Printf("ERROR updating %v/%v with frame %v: %v", dst, ts, frame, err)
-					} else {
-						log.Printf("updated frame %v/%v: %v", dst, ts, txt)
-					}
+		// TODO: restore noop case
+		/*
+			for frame := range frames {
+				<-tickerChan
+				if noop {
+					fmt.Printf("\033[2K\r%s", frame)
 				}
-			}
-		}
+		*/
 
-		fmt.Println("\nDone!")
+		err := Updater(context.Background(), apiToken, channel, frames, UpdaterOptions{
+			MinDelay: time.Millisecond * time.Duration(delay*1000),
+			UpdateFunc: func(u Update) {
+				if u.Err == nil {
+					log.Printf("posted frame %v/%v: %v",
+						u.Dst, u.TS, u.Frame,
+					)
+				} else {
+					log.Printf("ERROR updating %v/%v with frame %v: %v",
+						u.Dst, u.TS, u.Frame, u.Err)
+				}
+			},
+		})
+		if err != nil {
+			log.Fatal(err)
+		}
+		log.Println("Done!")
 	}
 
 	app.Run(os.Args)

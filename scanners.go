@@ -2,54 +2,138 @@ package main
 
 import (
 	"bufio"
-	"fmt"
-	"os"
+	"context"
+	"errors"
+	"io"
 )
 
-// StdinScanner will scan over STDIN, emitting a result on the returned channel
-// every time it is able to successfully read a line.
-//
-// When it encounters an EOF, it will close the results channel.
-func StdinScanner() chan string {
-	ch := make(chan string)
-	go func() {
-		reader := bufio.NewScanner(os.Stdin)
-		for reader.Scan() {
-			ch <- reader.Text()
-		}
-		if err := reader.Err(); err != nil {
-			fmt.Fprintln(os.Stderr, "reading standard input:", err)
-			os.Exit(1)
-		}
-		close(ch)
-	}()
-	return ch
+// LineScanner will scan over an io.Reader line by line, broadcasting each line
+// as a string over its Frames() channel. Once the io.Reader reaches EOF, the
+// output channel will be closed.
+type LineScanner struct {
+	out chan string
+	ctx context.Context
+	err error
 }
 
-// LoopingStdinScanner will consume entire STDIN until EOF, and then
-// continuously output on the results channel and never close.
-//
-// As a result, it is only suitable for input that will end, and will continue
-// consuming memory while never sending anything if STDIN is a process that
-// generates continuous output.
-func LoopingStdinScanner() chan string {
-	ch := make(chan string)
+// Frames returns a channel which will broadcast a string with the contents of
+// every line scanned from the underlying io.Reader.
+func (s *LineScanner) Frames() <-chan string {
+	return s.out
+}
+
+// Err returns the underlying error which was the cause of the LineScanner
+// closing its Frames channel. If the reason was the underlying io.Reader
+// encountered io.EOF, then Err will be nil.
+func (s *LineScanner) Err() error {
+	return s.err
+}
+
+// NewLineScanner starts and returns a new LineScanner for a given io.Reader.
+func NewLineScanner(ctx context.Context, in io.Reader) *LineScanner {
+	res := LineScanner{
+		out: make(chan string),
+		ctx: ctx,
+	}
 	go func() {
-		var frames []string
-		reader := bufio.NewScanner(os.Stdin)
+		defer close(res.out)
+		reader := bufio.NewScanner(in)
 		for reader.Scan() {
-			frames = append(frames, reader.Text())
+			if ctxDone := res.ctx.Err(); ctxDone != nil {
+				res.err = ctxDone
+				return
+			}
+			res.out <- reader.Text()
+		}
+		res.err = reader.Err()
+	}()
+	return &res
+}
+
+// ErrMaxFramesExceeded is returned by (*LoopingLineScanner).Err() if its
+// underlying io.Reader provides more lines of input than its specified maximum
+// number of frames.
+var ErrMaxFramesExceeded = errors.New("maximum number of frames exceeded")
+
+// LoopingLineScanner will first consume an entire underlying io.Reader until
+// EOF, and then continuously loop its lines on the Frames channel and never
+// close, unless its internal context is cancelled.
+//
+// A LoopingLineScanner has little practical usage (known to the author anyhow)
+// outside of creating animations that loop continulously, e.g. art and memes!
+type LoopingLineScanner struct {
+	out chan string
+	buf []string
+	ctx context.Context
+	err error
+}
+
+// Frames returns a channel which will loop over the scanner's frames forever.
+//
+// The Frames channel will not begin sending data until the LoopingLineScanner
+// has finished consuming the underlying io.Reader to EOF.
+func (s *LoopingLineScanner) Frames() <-chan string {
+	return s.out
+}
+
+// Err returns the underlying error which was the cause of the
+// LoopingLineScanner closing its Frames channel.
+//
+// The likely scenarios where this would occur are either an IO error during the
+// initial consumption of the underlying io.Reader (in which case, this error
+// will occur prior to any values being sent over the Frames channel), an
+// io.Reader that provides more lines than the configured maxFrames for the
+// scanner, or the completion of the scanner's context.
+func (s *LoopingLineScanner) Err() error {
+	return s.err
+}
+
+// NewLoopingLineScanner generates a LoopingLineScanner which will first consume
+// an entire io.Reader until EOF, and then continuously loop its lines on the
+// Frames() channel and never close unless its underlying context is canceled.
+//
+// As a result, it is only suitable for an input value that will have an EOF, as
+// otherwise it will continue consuming memory while never sending anything. You
+// can mitigate this risk by providing the required maxFrames parameter: if the
+// underlying io.Reader in exceeds this many lines of input, the Scanner will be
+// halted with an error and the output channel closed. If maxFrames is 0, no
+// checking will occur.
+func NewLoopingLineScanner(ctx context.Context, in io.Reader, maxFrames int) *LoopingLineScanner {
+	res := LoopingLineScanner{
+		out: make(chan string),
+		//buf: nil, /* nil is valid zero case for a slice */
+		ctx: ctx,
+	}
+
+	go func() {
+		defer close(res.out)
+		// consume all lines into buf slice until EOF
+		reader := bufio.NewScanner(in)
+		for reader.Scan() {
+			if maxFrames > 0 && len(res.buf) >= maxFrames {
+				res.err = ErrMaxFramesExceeded
+				return
+			}
+			if ctxDone := res.ctx.Err(); ctxDone != nil {
+				res.err = ctxDone
+				return
+			}
+			res.buf = append(res.buf, reader.Text())
 		}
 		if err := reader.Err(); err != nil {
-			fmt.Fprintln(os.Stderr, "reading standard input:", err)
-			os.Exit(1)
+			res.err = err
+			return
 		}
-
+		// iterate over buf array as output forever
 		for {
-			for _, frame := range frames {
-				ch <- frame
+			for _, frame := range res.buf {
+				if ctxDone := res.ctx.Err(); ctxDone != nil {
+					res.err = ctxDone
+					return
+				}
+				res.out <- frame
 			}
 		}
 	}()
-	return ch
+	return &res
 }
