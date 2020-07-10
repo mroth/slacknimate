@@ -21,15 +21,11 @@ Download a binary from the [Releases Page](https://github.com/mroth/slacknimate/
 _macOS Homebrew users, you can also just `brew install slacknimate`._
 
 ## Authentication
-Generate your Slack user token on [this page][1].
+Generate your Slack app and generate an API token. The app will need appropriate
+OAuth scopes to post messages to your desired destination.
 
 You'll need to either pass it to the program via the `--api-token` flag or store
 it as `SLACK_TOKEN` environment variable.
-
-_If you want the message to come from a bot name/icon instead, see "Bots"
-section at the bottom of this README._
-
-[1]: https://api.slack.com/docs/oauth-test-tokens
 
 ## Usage
 
@@ -90,11 +86,3 @@ would look like in the terminal via the `--preview` flag.
     $ slacknimate --preview --loop -d 0.25 < examples/sample.txt
 
 ![slacknimate3](https://cloud.githubusercontent.com/assets/40650/13275357/3b04b6ac-da82-11e5-9fab-1a7704c98b12.gif)
-
-## Bots
-In order for Slack message editing to work, the message _must_ be posted
-`as_user: true`, which will show as coming from whomever owns the token. This
-is due to how the security model for Slack message editing works.
-
-For bots, you must create a new bot in the team settings and substitute in the
-auth token for that bot.
