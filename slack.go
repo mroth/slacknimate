@@ -110,12 +110,12 @@ func Updater(ctx context.Context,
 		msgText := slack.MsgOptionText(frame, true)
 		var err error
 		if dst == "" || ts == "" {
-			dst, ts, err = api.PostMessage(channelID, msgText, msgOpts)
+			dst, ts, err = api.PostMessageContext(ctx, channelID, msgText, msgOpts)
 			if err != nil {
 				return fmt.Errorf("FATAL: Could not post initial frame: %w", err)
 			}
 		} else {
-			_, _, _, err = api.UpdateMessage(dst, ts, msgText, msgOpts)
+			_, _, _, err = api.UpdateMessageContext(ctx, dst, ts, msgText, msgOpts)
 		}
 		if opts.UpdateFunc != nil {
 			opts.UpdateFunc(Update{dst, ts, frame, err})
