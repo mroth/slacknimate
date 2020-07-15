@@ -46,15 +46,10 @@ func TestLineScanner(t *testing.T) {
 				t.Fatal("channel closed prematurely")
 			}
 		}
-		// give the scanner a bit so we know its next value was queued for the
-		// outbound channel, but don't consume it yet
-		<-time.After(time.Millisecond)
 		// oh no! someone just cancelled our context!
 		cf()
-		// one remaining produced value to be drained
-		if _, ok := <-s.Frames(); !ok {
-			t.Fatal("channel closed before drained")
-		}
+		// allow context cancellation time to propagate across goroutines
+		<-time.After(time.Millisecond)
 		// and now the channel should be closed
 		if _, ok := <-s.Frames(); ok {
 			t.Fatal("expected closed channel")
@@ -96,6 +91,7 @@ func TestLoopingLineScanner(t *testing.T) {
 
 		// cancel the context, make sure channel got closed
 		cancelFunc()
+		<-time.After(time.Millisecond)
 		_, ok := <-frames
 		if ok {
 			t.Fatal("channel not closed after context cancelled")

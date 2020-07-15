@@ -39,11 +39,12 @@ func NewLineScanner(ctx context.Context, in io.Reader) *LineScanner {
 		defer close(res.out)
 		reader := bufio.NewScanner(in)
 		for reader.Scan() {
-			if ctxDone := res.ctx.Err(); ctxDone != nil {
-				res.err = ctxDone
+			select {
+			case res.out <- reader.Text():
+			case <-res.ctx.Done():
+				res.err = res.ctx.Err()
 				return
 			}
-			res.out <- reader.Text()
 		}
 		res.err = reader.Err()
 	}()
@@ -127,11 +128,12 @@ func NewLoopingLineScanner(ctx context.Context, in io.Reader, maxFrames int) *Lo
 		// iterate over buf array as output forever
 		for {
 			for _, frame := range res.buf {
-				if ctxDone := res.ctx.Err(); ctxDone != nil {
-					res.err = ctxDone
+				select {
+				case res.out <- frame:
+				case <-res.ctx.Done():
+					res.err = res.ctx.Err()
 					return
 				}
-				res.out <- frame
 			}
 		}
 	}()
