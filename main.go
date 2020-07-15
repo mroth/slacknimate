@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/codegangsta/cli"
+	"github.com/slack-go/slack"
 )
 
 func main() {
@@ -77,8 +78,8 @@ func main() {
 					fmt.Printf("\033[2K\r%s", frame)
 				}
 		*/
-
-		err := Updater(context.Background(), apiToken, channel, frames, UpdaterOptions{
+		api := slack.New(apiToken)
+		err := Updater(context.Background(), api, channel, frames, UpdaterOptions{
 			MinDelay: time.Millisecond * time.Duration(delay*1000),
 			UpdateFunc: func(u Update) {
 				if u.Err == nil {

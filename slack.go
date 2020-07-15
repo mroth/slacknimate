@@ -9,7 +9,7 @@ import (
 )
 
 type UpdaterOptions struct {
-	MinDelay   time.Duration // minimum delay between frames
+	MinDelay   time.Duration // minimum delay between frames // TODO: externalize?
 	UpdateFunc func(Update)
 
 	Username  string // override bot username
@@ -39,8 +39,8 @@ func (opts UpdaterOptions) slackMsgOptions() slack.MsgOption {
 //
 // The Slack channel can be an encoded ID, or a name.
 //
-// The Slack authentication token must be bearing required OAuth scopes for its
-// destination and options.
+// The Slack api client should be configured using an authentication token that
+// is bearing required OAuth scopes for its destination and options.
 //
 // Results
 //
@@ -73,7 +73,7 @@ func (opts UpdaterOptions) slackMsgOptions() slack.MsgOption {
 // This allows the consumer the most flexibility in how to consume these
 // updates.
 func Updater(ctx context.Context,
-	token string, // TODO: replace with api client to allow endpoints
+	api *slack.Client,
 	channelID string,
 	frames <-chan string,
 	opts UpdaterOptions) error {
@@ -84,7 +84,6 @@ func Updater(ctx context.Context,
 		defer delayTicker.Stop()
 	}
 
-	api := slack.New(token)
 	msgOpts := opts.slackMsgOptions()
 
 	var dst, ts string
