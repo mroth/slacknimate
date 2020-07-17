@@ -1,3 +1,5 @@
+// Package slacknimate provides facilities for posting continuous realtime
+// status updates to a single Slack message.
 package slacknimate
 
 import (
@@ -8,9 +10,10 @@ import (
 	"github.com/slack-go/slack"
 )
 
+// UpdaterOptions contains optional configuration for the Update function.
 type UpdaterOptions struct {
-	MinDelay   time.Duration // minimum delay between frames // TODO: externalize?
-	UpdateFunc func(Update)
+	MinDelay   time.Duration // minimum delay between frames
+	UpdateFunc func(Update)  // callback to perform upon each update result
 
 	Username  string // override bot username
 	IconEmoji string // override bot icon with Emoji
@@ -31,16 +34,15 @@ func (opts UpdaterOptions) slackMsgOptions() slack.MsgOption {
 	return slack.MsgOptionCompose(msgOpts...)
 }
 
-// Updater posts and updates the "animated" message via the Slack API.
-//
-// Will consume the required frames chan, posting the initial frame as a Slack
+// Updater posts and updates the "animated" message via the Slack API. It
+// consumes the required frames chan, posting the initial frame as a Slack
 // message to the provided destination Slack channel, and using each subsequent
 // frame to update the text of the posted message.
 //
 // The Slack channel can be an encoded ID, or a name.
 //
 // The Slack api client should be configured using an authentication token that
-// is bearing required OAuth scopes for its destination and options.
+// is bearing appropriate OAuth scopes for its destination and options.
 //
 // Results
 //
@@ -126,7 +128,7 @@ func Updater(ctx context.Context,
 }
 
 // Update represents the status returned from the Slack API for a specific
-// message post or update.
+// frame message post or update.
 type Update struct {
 	Dst   string // target message destination channel ID
 	TS    string // target message timestamp in Slack API format

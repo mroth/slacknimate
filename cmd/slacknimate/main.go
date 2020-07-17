@@ -1,3 +1,5 @@
+// Command slacknimate is a basic CLI client for the slacknimate library that
+// posts each line from os.Stdin.
 package main
 
 import (
