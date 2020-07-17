@@ -37,19 +37,19 @@ USAGE:
    slacknimate [options]
 
 VERSION:
-   1.0.0
-
-COMMANDS:
-   help, h	Shows a list of commands or help for one command
+   1.1.0-development
 
 GLOBAL OPTIONS:
-   --api-token, -a      API token* [$SLACK_TOKEN]
-   --delay, -d "1"      minimum delay between frames
-   --channel, -c        channel/destination* [$SLACK_CHANNEL]
-   --loop, -l           loop content upon reaching end
-   --preview            preview on terminal instead of posting
-   --help, -h           show help
-   --version, -v        print the version
+   --token value, -a value    Slack API token* [$SLACK_TOKEN]
+   --channel value, -c value  Slack channel* [$SLACK_CHANNEL]
+   --username value           Slack username [$SLACK_USERNAME]
+   --icon-url value           Slack icon from url [$SLACK_ICON_URL]
+   --icon-emoji value         Slack icon from emoji [$SLACK_ICON_EMOJI]
+   --delay value, -d value    minimum delay between frames (default: 1)
+   --loop, -l                 loop content upon reaching EOF (default: false)
+   --preview                  preview on terminal only (default: false)
+   --help, -h                 show help (default: false)
+   --version, -v              print the version (default: false)
 ```
 
 ### Simple animation loops

@@ -21,6 +21,10 @@ type options struct {
 	delay    float64
 	loop     bool
 	preview  bool
+
+	slackUsername  string
+	slackIconURL   string
+	slackIconEmoji string
 }
 
 func main() {
@@ -32,10 +36,31 @@ func main() {
 		HideHelpCommand: true,
 		Flags: []cli.Flag{
 			&cli.StringFlag{
-				Name:    "api-token",
+				Name:    "token",
 				Aliases: []string{"a"},
-				Usage:   "API token*",
+				Usage:   "Slack API token*",
 				EnvVars: []string{"SLACK_TOKEN"},
+			},
+			&cli.StringFlag{
+				Name:    "channel",
+				Aliases: []string{"c"},
+				Usage:   "Slack channel*",
+				EnvVars: []string{"SLACK_CHANNEL"},
+			},
+			&cli.StringFlag{
+				Name:    "username",
+				Usage:   "Slack username",
+				EnvVars: []string{"SLACK_USERNAME"},
+			},
+			&cli.StringFlag{
+				Name:    "icon-url",
+				Usage:   "Slack icon from url",
+				EnvVars: []string{"SLACK_ICON_URL"},
+			},
+			&cli.StringFlag{
+				Name:    "icon-emoji",
+				Usage:   "Slack icon from emoji",
+				EnvVars: []string{"SLACK_ICON_EMOJI"},
 			},
 			&cli.Float64Flag{
 				Name:    "delay",
@@ -43,20 +68,14 @@ func main() {
 				Usage:   "minimum delay between frames",
 				Value:   1,
 			},
-			&cli.StringFlag{
-				Name:    "channel",
-				Aliases: []string{"c"},
-				Usage:   "channel/destination*",
-				EnvVars: []string{"SLACK_CHANNEL"},
-			},
 			&cli.BoolFlag{
 				Name:    "loop",
 				Aliases: []string{"l"},
-				Usage:   "loop content upon reaching end",
+				Usage:   "loop content upon reaching EOF",
 			},
 			&cli.BoolFlag{
 				Name:  "preview",
-				Usage: "preview on terminal instead of posting",
+				Usage: "preview on terminal only",
 			},
 		},
 		Action: func(c *cli.Context) error {
@@ -78,11 +97,15 @@ func main() {
 // that would be annoying to model via the cli module.
 func parseOpts(c *cli.Context) (options, error) {
 	opts := options{
-		apiToken: c.String("api-token"),
+		apiToken: c.String("token"),
 		channel:  c.String("channel"),
 		delay:    c.Float64("delay"),
 		loop:     c.Bool("loop"),
 		preview:  c.Bool("preview"),
+
+		slackUsername:  c.String("username"),
+		slackIconURL:   c.String("icon-url"),
+		slackIconEmoji: c.String("icon-emoji"),
 	}
 	if !opts.preview {
 		if opts.apiToken == "" {
@@ -118,9 +141,10 @@ func post(opts options) error {
 
 	api := slack.New(opts.apiToken)
 	err := slacknimate.Updater(context.Background(), api, opts.channel, frames, slacknimate.UpdaterOptions{
-		// Username:  "Animation Funtime",
-		// IconEmoji: "cat",
-		MinDelay: delay,
+		Username:  opts.slackUsername,
+		IconURL:   opts.slackIconURL,
+		IconEmoji: opts.slackIconEmoji,
+		MinDelay:  delay,
 		UpdateFunc: func(u slacknimate.Update) {
 			if u.Err == nil {
 				log.Printf("posted frame %v/%v: %v",
