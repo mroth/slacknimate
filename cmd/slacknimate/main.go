@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log"
 	"os"
 	"time"
@@ -109,20 +110,17 @@ func post(opts options) error {
 		frames = slacknimate.NewLineScanner(ctx, os.Stdin).Frames()
 	}
 
-	// TODO: restore noop case
-	/*
-		for frame := range frames {
-			<-tickerChan
-			if noop {
-				fmt.Printf("\033[2K\r%s", frame)
-			}
-	*/
+	delay := time.Millisecond * time.Duration(opts.delay*1000)
+	if opts.preview {
+		previewer(ctx, frames, delay)
+		os.Exit(0)
+	}
 
 	api := slack.New(opts.apiToken)
 	err := slacknimate.Updater(context.Background(), api, opts.channel, frames, slacknimate.UpdaterOptions{
 		// Username:  "Animation Funtime",
 		// IconEmoji: "cat",
-		MinDelay: time.Millisecond * time.Duration(opts.delay*1000),
+		MinDelay: delay,
 		UpdateFunc: func(u slacknimate.Update) {
 			if u.Err == nil {
 				log.Printf("posted frame %v/%v: %v",
@@ -135,4 +133,17 @@ func post(opts options) error {
 		},
 	})
 	return err
+}
+
+func previewer(ctx context.Context, frames <-chan string, delay time.Duration) {
+	delayTicker := time.NewTicker(delay)
+	defer delayTicker.Stop()
+	for frame := range frames {
+		select {
+		case <-delayTicker.C:
+		case <-ctx.Done():
+			return
+		}
+		fmt.Printf("\033[2K\r%s", frame)
+	}
 }
