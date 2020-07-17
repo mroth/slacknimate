@@ -11,6 +11,8 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
+var version = "development"
+
 type options struct {
 	apiToken string
 	channel  string
@@ -23,7 +25,7 @@ func main() {
 	app := cli.App{
 		Name:            "slacknimate",
 		Usage:           "text animation for Slack messages",
-		Version:         "1.0.1",
+		Version:         version,
 		UsageText:       "slacknimate [options]",
 		HideHelpCommand: true,
 		Flags: []cli.Flag{
