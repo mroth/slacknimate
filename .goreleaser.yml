@@ -10,6 +10,7 @@ builds:
       - windows
     goarch:
       - amd64
+    main: ./cmd/slacknimate
 archives:
   - format_overrides:
       - goos: windows

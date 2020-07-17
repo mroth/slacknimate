@@ -7,6 +7,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/mroth/slacknimate"
 	"github.com/slack-go/slack"
 	"github.com/urfave/cli/v2"
 )
@@ -103,9 +104,9 @@ func post(opts options) error {
 	// setup frame source
 	var frames <-chan string
 	if opts.loop {
-		frames = NewLoopingLineScanner(ctx, os.Stdin, 4096).Frames()
+		frames = slacknimate.NewLoopingLineScanner(ctx, os.Stdin, 4096).Frames()
 	} else {
-		frames = NewLineScanner(ctx, os.Stdin).Frames()
+		frames = slacknimate.NewLineScanner(ctx, os.Stdin).Frames()
 	}
 
 	// TODO: restore noop case
@@ -118,11 +119,11 @@ func post(opts options) error {
 	*/
 
 	api := slack.New(opts.apiToken)
-	err := Updater(context.Background(), api, opts.channel, frames, UpdaterOptions{
+	err := slacknimate.Updater(context.Background(), api, opts.channel, frames, slacknimate.UpdaterOptions{
 		// Username:  "Animation Funtime",
 		// IconEmoji: "cat",
 		MinDelay: time.Millisecond * time.Duration(opts.delay*1000),
-		UpdateFunc: func(u Update) {
+		UpdateFunc: func(u slacknimate.Update) {
 			if u.Err == nil {
 				log.Printf("posted frame %v/%v: %v",
 					u.Dst, u.TS, u.Frame,

@@ -6,7 +6,7 @@ build_deps:
 		{ echo >&2 "I require go but it is not installed.  Aborting."; exit 1; }
 
 build: build_deps
-	go build -o bin/slacknimate
+	go build -o bin/slacknimate ./cmd/slacknimate
 
 package_deps:
 	@type goreleaser >/dev/null 2>&1 || \
