@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"os/signal"
 	"time"
 
 	"github.com/mroth/slacknimate"
@@ -83,12 +84,22 @@ func main() {
 			if err != nil {
 				return err
 			}
-			return post(opts)
+			return post(c.Context, opts)
 		},
 	}
 
-	err := app.Run(os.Args)
-	if err != nil {
+	// handle graceful shutdowns
+	ctx, cancel := context.WithCancel(context.Background())
+	interruptC := make(chan os.Signal, 1)
+	signal.Notify(interruptC, os.Interrupt)
+	go func() {
+		c := <-interruptC
+		log.Printf("Got %v signal. Aborting...", c)
+		cancel()
+	}()
+
+	err := app.RunContext(ctx, os.Args)
+	if err != nil && !errors.Is(err, context.Canceled) {
 		log.Fatal(err)
 	}
 }
@@ -121,11 +132,7 @@ func parseOpts(c *cli.Context) (options, error) {
 	return opts, nil
 }
 
-func post(opts options) error {
-	// for now, just use default context, but will want to adjust in future
-	ctx := context.TODO()
-
-	// setup frame source
+func post(ctx context.Context, opts options) error {
 	var frames <-chan string
 	if opts.loop {
 		frames = slacknimate.NewLoopingLineScanner(ctx, os.Stdin, 4096).Frames()
@@ -135,8 +142,7 @@ func post(opts options) error {
 
 	delay := time.Millisecond * time.Duration(opts.delay*1000)
 	if opts.preview {
-		previewer(ctx, frames, delay)
-		os.Exit(0)
+		return previewer(ctx, frames, delay)
 	}
 
 	api := slack.New(opts.apiToken)
@@ -159,15 +165,16 @@ func post(opts options) error {
 	return err
 }
 
-func previewer(ctx context.Context, frames <-chan string, delay time.Duration) {
+func previewer(ctx context.Context, frames <-chan string, delay time.Duration) error {
 	delayTicker := time.NewTicker(delay)
 	defer delayTicker.Stop()
 	for frame := range frames {
 		select {
 		case <-delayTicker.C:
 		case <-ctx.Done():
-			return
+			return ctx.Err()
 		}
 		fmt.Printf("\033[2K\r%s", frame)
 	}
+	return nil
 }
