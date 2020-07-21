@@ -1,4 +1,4 @@
-.PHONY: build_deps build goinstall gouninstall package_deps package clobber
+.PHONY: build_deps build package_deps package clobber
 .DEFAULT_GOAL := build
 
 build_deps:
@@ -6,26 +6,14 @@ build_deps:
 		{ echo >&2 "I require go but it is not installed.  Aborting."; exit 1; }
 
 build: build_deps
-	go build -o bin/slacknimate
+	go build -o bin/slacknimate ./cmd/slacknimate
 
-
-# Standard go install, for people with a valid go / $GOPATH setup
-goinstall:
-	go install .
-
-gouninstall:
-	rm $(GOPATH)/bin/slacknimate
-
-
-# For cross compiling and packaging releases
 package_deps:
-	go get github.com/laher/goxc
+	@type goreleaser >/dev/null 2>&1 || \
+		{ echo >&2 "I require goreleaser but it is not installed.  Aborting."; exit 1; }
 
-package: package_deps build
-	goxc -pv=`./bin/slacknimate -v | cut -d' ' -f3` \
-	     --resources-include="README*,LICENSE*,examples" \
-	     -d="builds" -bc="linux,!arm darwin windows" xc archive rmbin
-
+package: package_deps
+	goreleaser release --rm-dist --skip-publish
 
 clobber:
-	rm -rf builds bin
+	rm -rf dist bin
