@@ -4,5 +4,5 @@ go 1.15
 
 require (
 	github.com/slack-go/slack v0.6.6
-	github.com/urfave/cli/v2 v2.2.0
+	github.com/urfave/cli/v2 v2.24.3
 )
